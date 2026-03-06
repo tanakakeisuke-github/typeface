@@ -16,13 +16,24 @@ canvas{position:fixed;top:0;left:0}
 .btn{background:none;border:1px solid #333;color:#555;font:10px/1 'Courier New',monospace;
   letter-spacing:0.18em;text-transform:uppercase;padding:6px 18px;cursor:pointer;transition:all .3s}
 .btn:hover{border-color:#888;color:#aaa}
-.btn.on{border-color:#ff3060;color:#ff3060}
+.btn.on{border-color:#fff;color:#fff}
 #dbg{position:fixed;top:8px;left:8px;color:#555;font:10px/1.4 'Courier New',monospace;z-index:30;pointer-events:none}
 #counter{position:fixed;top:8px;right:12px;color:#333;font:10px/1 'Courier New',monospace;z-index:30;pointer-events:none}
-#musicInfo{position:fixed;top:28px;left:8px;color:#ff3060;font:10px/1.4 'Courier New',monospace;z-index:30;pointer-events:none;opacity:0;transition:opacity .5s}
+#musicInfo{position:fixed;top:28px;left:8px;color:#999;font:10px/1.4 'Courier New',monospace;z-index:30;pointer-events:none;opacity:0;transition:opacity .5s}
 #musicInfo.show{opacity:1}
 #musicProgress{position:fixed;bottom:48px;left:50%;transform:translateX(-50%);width:200px;height:2px;background:#1a1a1a;z-index:20;cursor:pointer;display:none}
-#musicProgress .bar{height:100%;background:#ff3060;width:0%;transition:none}
+#musicProgress .bar{height:100%;background:#fff;width:0%;transition:none}
+
+#devPanel{position:fixed;top:8px;right:8px;z-index:50;background:rgba(10,10,10,0.92);border:1px solid #333;padding:12px 16px;font:10px/1.6 'Courier New',monospace;color:#666;width:220px;max-height:90vh;overflow-y:auto;display:none;pointer-events:auto}
+#devPanel.show{display:block}
+#devPanel h3{color:#888;font-size:10px;margin:0 0 8px;letter-spacing:0.15em;text-transform:uppercase;border-bottom:1px solid #222;padding-bottom:4px}
+#devPanel label{display:flex;justify-content:space-between;align-items:center;margin:3px 0;color:#555}
+#devPanel label span{min-width:60px}
+#devPanel input[type=range]{width:90px;height:2px;-webkit-appearance:none;background:#333;outline:none;cursor:pointer}
+#devPanel input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:8px;background:#888;border-radius:50%;cursor:pointer}
+#devPanel .val{color:#888;min-width:30px;text-align:right;font-variant-numeric:tabular-nums}
+#devPanel .section{margin-top:8px;padding-top:6px;border-top:1px solid #1a1a1a}
+
 </style>
 </head>
 <body>
@@ -36,6 +47,27 @@ canvas{position:fixed;top:0;left:0}
 </div>
 <div id="musicProgress"><div class="bar"></div></div>
 <input type="file" id="musicFile" accept="audio/*" style="display:none">
+
+<button class="btn" id="devBtn" style="position:fixed;top:8px;right:8px;z-index:51;padding:4px 10px">dev</button>
+<div id="devPanel">
+<h3>dev controls</h3>
+<label><span>wave</span><input type="range" id="s_wave" min="0" max="200" value="100"><span class="val" id="v_wave">1.0</span></label>
+<label><span>pulse</span><input type="range" id="s_pulse" min="0" max="200" value="100"><span class="val" id="v_pulse">1.0</span></label>
+<label><span>scatter</span><input type="range" id="s_scatter" min="0" max="200" value="100"><span class="val" id="v_scatter">1.0</span></label>
+<label><span>beat pow</span><input type="range" id="s_beatpow" min="0" max="200" value="100"><span class="val" id="v_beatpow">1.0</span></label>
+<label><span>beat sens</span><input type="range" id="s_beatsens" min="10" max="200" value="100"><span class="val" id="v_beatsens">1.0</span></label>
+<div class="section"></div>
+<label><span>corrupt</span><input type="range" id="s_corrupt" min="0" max="200" value="100"><span class="val" id="v_corrupt">1.0</span></label>
+<label><span>spring</span><input type="range" id="s_spring" min="10" max="300" value="100"><span class="val" id="v_spring">1.0</span></label>
+<label><span>size</span><input type="range" id="s_size" min="0" max="200" value="100"><span class="val" id="v_size">1.0</span></label>
+<div class="section"></div>
+<label><span>bright</span><input type="range" id="s_bright" min="0" max="200" value="100"><span class="val" id="v_bright">1.0</span></label>
+<label><span>flash</span><input type="range" id="s_flash" min="0" max="200" value="100"><span class="val" id="v_flash">1.0</span></label>
+<label><span>glitch</span><input type="range" id="s_glitch" min="0" max="200" value="100"><span class="val" id="v_glitch">1.0</span></label>
+<label><span>row shift</span><input type="range" id="s_row" min="0" max="200" value="100"><span class="val" id="v_row">1.0</span></label>
+<label><span>noise</span><input type="range" id="s_noise" min="0" max="200" value="100"><span class="val" id="v_noise">1.0</span></label>
+</div>
+
 <div id="dbg">type to write</div>
 <div id="counter">0/48</div>
 <div id="musicInfo"></div>
@@ -59,6 +91,9 @@ var musicBass=0,musicMid=0,musicHigh=0,musicEnergy=0;
 var musicBeat=false,musicBeatThreshold=0.35,musicBeatDecay=0;
 var musicPrevEnergy=0,musicEnergyHistory=[];
 var musicFileName='';
+// ===== DEV PANEL =====
+var D={wave:1,pulse:1,scatter:1,beatpow:1,beatsens:1,corrupt:1,spring:1,size:1,bright:1,flash:1,glitch:1,row:1,noise:1};
+
 
 function tryInitAudio(){
 if(audioOk){if(actx&&actx.state==='suspended')actx.resume();return;}
@@ -249,7 +284,7 @@ if(musicEnergyHistory.length>30)musicEnergyHistory.shift();
 var avgE=0;
 for(var i=0;i<musicEnergyHistory.length;i++)avgE+=musicEnergyHistory[i];
 avgE/=musicEnergyHistory.length;
-musicBeat=musicEnergy>avgE*1.2&&musicBass>0.3&&musicBeatDecay<=0;
+musicBeat=musicEnergy>avgE*(1.2/D.beatsens)&&musicBass>(0.3/D.beatsens)&&musicBeatDecay<=0;
 if(musicBeat)musicBeatDecay=4;
 if(musicBeatDecay>0)musicBeatDecay--;
 if(musicBuffer){
@@ -302,6 +337,23 @@ document.getElementById('clearBtn').addEventListener('click',function(){
 currentText='';targetInt=0.6;sampleText();updateCounter();
 });
 
+
+document.getElementById('devBtn').addEventListener('click',function(e){
+e.stopPropagation();
+var p=document.getElementById('devPanel');
+p.classList.toggle('show');
+if(p.classList.contains('show'))this.classList.add('on');else this.classList.remove('on');
+});
+document.getElementById('devPanel').addEventListener('mousedown',function(e){e.stopPropagation();});
+document.getElementById('devPanel').addEventListener('keydown',function(e){e.stopPropagation();});
+(function(){
+var ids=['wave','pulse','scatter','beatpow','beatsens','corrupt','spring','size','bright','flash','glitch','row','noise'];
+ids.forEach(function(id){
+var sl=document.getElementById('s_'+id),vl=document.getElementById('v_'+id);
+sl.addEventListener('input',function(){D[id]=parseFloat(sl.value)/100;vl.textContent=D[id].toFixed(1);});
+});
+})();
+
 function updateCounter(){
 counterEl.textContent=currentText.length+'/'+MAX_CHARS;
 }
@@ -345,37 +397,33 @@ this.vx+=(this.hx+wx-this.x)*0.04;this.vy+=(this.hy+wy-this.y)*0.04;
 var bdx=this.x-autoWX,bdy=this.y-autoWY,bd=Math.sqrt(bdx*bdx+bdy*bdy),br=120+int*160;
 if(bd<br&&int>0.15){var f2=(1-bd/br)*int*6,a2=Math.atan2(bdy,bdx)+(Math.random()-0.5)*1.5;this.vx+=Math.cos(a2)*f2;this.vy+=Math.sin(a2)*f2;if(Math.random()<0.25){this.corrupt=true;this.ct=12+Math.random()*35;}}}
 if(musicPlaying){
-var mWave=Math.sin(this.hy*0.005+fr*0.03*musicMid)*musicBass*20;
-var mPulse=Math.cos(this.hx*0.004+fr*0.02)*musicHigh*12;
-this.vx+=(mWave+(Math.random()-0.5)*musicEnergy*8)*0.5;
-this.vy+=(mPulse+(Math.random()-0.5)*musicEnergy*6)*0.5;
+var mWave=Math.sin(this.hy*0.005+fr*0.03*musicMid)*musicBass*20*D.wave;
+var mPulse=Math.cos(this.hx*0.004+fr*0.02)*musicHigh*12*D.pulse;
+this.vx+=(mWave+(Math.random()-0.5)*musicEnergy*8*D.scatter)*0.5;
+this.vy+=(mPulse+(Math.random()-0.5)*musicEnergy*6*D.scatter)*0.5;
 if(musicBeat){
 var bAngle=Math.atan2(this.y-H/2,this.x-W/2)+Math.random()*0.5;
-var bForce=musicBass*35;
+var bForce=musicBass*35*D.beatpow;
 this.vx+=Math.cos(bAngle)*bForce;
 this.vy+=Math.sin(bAngle)*bForce;
 this.corrupt=true;
-this.ct=20+Math.random()*40;
+this.ct=(20+Math.random()*40)*D.corrupt;
 }
-if(musicBass>0.4&&Math.random()<0.15){this.corrupt=true;this.ct=15+Math.random()*30;}
+if(musicBass>0.4&&Math.random()<0.15*D.corrupt){this.corrupt=true;this.ct=(15+Math.random()*30)*D.corrupt;}
 }
-var sp=this.corrupt?0.012:0.08;this.vx+=(this.hx-this.x)*sp;this.vy+=(this.hy-this.y)*sp;this.vx*=0.88;this.vy*=0.88;
+var sp=this.corrupt?0.012*D.spring:0.08*D.spring;this.vx+=(this.hx-this.x)*sp;this.vy+=(this.hy-this.y)*sp;this.vx*=0.88;this.vy*=0.88;
 if(this.corrupt){this.vx+=(Math.random()-0.5)*int*2.5;this.vy+=(Math.random()-0.5)*int*1.8;this.ct--;if(this.ct<=0)this.corrupt=false;}
 if(int>0.1){this.vx+=(Math.random()-0.5)*int*0.8;this.vy+=(Math.random()-0.5)*int*0.6;}
 this.x+=this.vx;this.y+=this.vy;
 this.r=BR+Math.sin(fr*this.bs+this.ph)*0.3;if(this.corrupt)this.r=BR+Math.random()*int*3;if(int>0.5&&Math.random()<0.012)this.r=0.4;
-if(musicPlaying){this.r+=musicBass*3+musicEnergy*1.5;}
+if(musicPlaying){this.r+=(musicBass*3+musicEnergy*1.5)*D.size;}
 if(this.dead){this.x=this.hx+this.stuck;this.y=this.hy+this.stuck;}
 };
 Dot.prototype.draw=function(ctx,int){
 var r=this.b,g=this.b,bl=this.b;
-if(this.dead){if(Math.random()<0.7){r=255;g=30;bl=60;}else{r=0;g=0;bl=0;}}
-else if(this.corrupt){var ch=(Math.random()*3)|0;if(ch===0){r=Math.min(255,this.b+100*int);g*=0.3;bl*=0.3;}else if(ch===1){g=Math.min(255,this.b+80*int);r*=0.3;bl*=0.3;}else{bl=Math.min(255,this.b+110*int);r*=0.3;g*=0.3;}}
-if(musicPlaying&&!this.dead){
-r=Math.min(255,r+musicBass*200);
-g=Math.min(255,g+musicMid*150);
-bl=Math.min(255,bl+musicHigh*180);
-if(musicBeat){r=Math.min(255,r+150);g=Math.min(255,g+60);bl=Math.min(255,bl+80);}
+if(this.dead){if(Math.random()<0.7){r=255;g=255;bl=255;}else{r=0;g=0;bl=0;}}
+else if(this.corrupt){var cv=Math.min(255,this.b+100*int*D.bright*(0.5+Math.random()));r=cv;g=cv;bl=cv;}
+if(musicPlaying&&!this.dead){ var mb=(musicBass*200+musicMid*150+musicHigh*180)/3*D.bright; var mv=Math.min(255,r+mb); r=mv;g=mv;bl=mv; if(musicBeat){var fl=100*D.flash;r=Math.min(255,r+fl);g=Math.min(255,g+fl);bl=Math.min(255,bl+fl);} }
 }
 if(((this.y/6)|0)%2===0&&int>0.2){r*=0.75;g*=0.75;bl*=0.75;}
 if(int>0.4){var s=Math.max(2,(28*int)|0);r=((r/s)|0)*s;g=((g/s)|0)*s;bl=((bl/s)|0)*s;}
@@ -435,24 +483,24 @@ particles.push(dot);}}}
 }
 
 function drawStatic(){var img=stX.createImageData(W,H),d=img.data,lv=12+intensity*200;
-if(musicPlaying)lv+=musicEnergy*250;
+if(musicPlaying)lv+=musicEnergy*250*D.noise;
 for(var i=0;i<d.length;i+=8){var v=Math.random()*lv;d[i]=v;d[i+1]=v;d[i+2]=v;d[i+3]=255;d[i+4]=v;d[i+5]=v;d[i+6]=v;d[i+7]=255;}
-stX.putImageData(img,0,0);stC.style.opacity=''+(0.02+intensity*0.12+(musicPlaying?musicEnergy*0.15:0));}
+stX.putImageData(img,0,0);stC.style.opacity=''+(0.02+intensity*0.12+(musicPlaying?musicEnergy*0.15*D.noise:0));}
 
 function drawBg(){bgX.fillStyle='rgba(10,10,10,'+(0.2+(1-intensity)*0.4)+')';bgX.fillRect(0,0,W,H);
 var effectInt=intensity;
 if(musicPlaying)effectInt=Math.max(effectInt,musicEnergy*2.0);
 if(effectInt<0.03)return;
-var n=(effectInt*18)|0,cols=['255,20,60','20,255,100','60,80,255','255,255,255'];
-if(musicPlaying){cols=['255,'+Math.floor(30+musicMid*100)+',60','20,255,'+Math.floor(100+musicHigh*155),''+Math.floor(60+musicBass*195)+',80,255','255,255,255'];}
+var n=(effectInt*18)|0,cols=['255,255,255','200,200,200','160,160,160','255,255,255'];
+if(musicPlaying){cols=['255,255,255','220,220,220','180,180,180','255,255,255'];}
 for(var i=0;i<n;i++){bgX.fillStyle='rgba('+cols[i%4]+','+effectInt*0.07+')';bgX.fillRect((Math.random()-0.5)*effectInt*100,Math.random()*H,W,1+Math.random()*effectInt*35);}
-if(effectInt>0.5){var bl=((effectInt-0.5)*10)|0;for(var i=0;i<bl;i++){bgX.fillStyle='rgba('+(Math.random()*50|0)+','+(Math.random()*50|0)+','+(Math.random()*50|0)+','+(0.3+Math.random()*0.4)+')';bgX.fillRect(Math.random()*W,Math.random()*H,2+Math.random()*50*effectInt,2+Math.random()*6);}}}
+if(effectInt>0.5){var bl=((effectInt-0.5)*10)|0;for(var i=0;i<bl;i++){bgX.fillStyle='rgba('+((Math.random()*50|0))+','+((Math.random()*50|0))+','+((Math.random()*50|0))+','+(0.3+Math.random()*0.4)+')';bgX.fillRect(Math.random()*W,Math.random()*H,2+Math.random()*50*effectInt,2+Math.random()*6);}}}
 
 function rowDisplace(){
 var effectInt=intensity;
-if(musicPlaying)effectInt=Math.max(effectInt,musicBass*1.2);
+if(musicPlaying)effectInt=Math.max(effectInt,musicBass*1.2*D.row);
 if(effectInt<0.15)return;var n=(effectInt*6)|0;
-if(musicBeat)n+=10;
+if(musicBeat)n+=Math.floor(10*D.row);
 for(var i=0;i<n;i++){var y=(Math.random()*H)|0,h=Math.min((1+Math.random()*12*effectInt)|0,H-y),s=((Math.random()-0.5)*effectInt*50)|0;
 if(h>0&&Math.abs(s)>0){try{var sl=dotX.getImageData(0,y,W,h);dotX.putImageData(sl,s,y);}catch(e){}}}}
 
@@ -485,9 +533,9 @@ dotX.fillRect(cx,cy-fs*0.35,Math.max(2,fs*0.05),fs*0.7);
 function animate(){frame++;
 analyzeMusicData();
 if(musicPlaying){
-var musicInt=musicEnergy*2.5+musicBass*1.0;
+var musicInt=(musicEnergy*2.5+musicBass*1.0)*D.bright;
 targetInt=Math.max(targetInt,Math.min(1,musicInt));
-if(musicBeat&&Math.random()<0.8){
+if(musicBeat&&Math.random()<0.8*D.glitch){
 serifW+=(Math.random()-0.5)*1.0;
 serifW=Math.max(0,Math.min(1,serifW));
 var p=Math.random()<serifW?FSERIF:FSANS;
@@ -509,7 +557,7 @@ rowDisplace();
 if(intensity>0.3&&Math.random()<intensity*0.25){var sy=(Math.random()*H)|0,dy=sy+(((Math.random()-0.5)*35*intensity)|0);
 if(dy>0&&dy<H-2){try{var rr=dotX.getImageData(0,sy,W,2);dotX.putImageData(rr,0,dy);}catch(e){}}}
 drawBg();if(frame%3===0)drawStatic();
-if(intensity>0.7&&Math.random()<0.03){dotX.fillStyle='rgba(255,255,255,'+(0.02+Math.random()*0.05)+')';dotX.fillRect(0,0,W,H);}
+if(intensity>0.7&&Math.random()<0.03*D.flash){dotX.fillStyle='rgba(255,255,255,'+(0.02+Math.random()*0.05)*D.flash+')';dotX.fillRect(0,0,W,H);}
 updateSound(intensity);requestAnimationFrame(animate);}
 
 function resize(){W=innerWidth;H=innerHeight;bgC.width=W;bgC.height=H;dotC.width=W;dotC.height=H;stC.width=W;stC.height=H;offC.width=W;offC.height=H;sampleText();}
