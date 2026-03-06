@@ -56,7 +56,7 @@ var musicSource=null,musicAnalyser=null,musicGain=null;
 var musicBuffer=null,musicStartTime=0,musicPauseOffset=0;
 var musicFreqData=null,musicTimeData=null;
 var musicBass=0,musicMid=0,musicHigh=0,musicEnergy=0;
-var musicBeat=false,musicBeatThreshold=0.6,musicBeatDecay=0;
+var musicBeat=false,musicBeatThreshold=0.35,musicBeatDecay=0;
 var musicPrevEnergy=0,musicEnergyHistory=[];
 var musicFileName='';
 
@@ -249,8 +249,8 @@ if(musicEnergyHistory.length>30)musicEnergyHistory.shift();
 var avgE=0;
 for(var i=0;i<musicEnergyHistory.length;i++)avgE+=musicEnergyHistory[i];
 avgE/=musicEnergyHistory.length;
-musicBeat=musicEnergy>avgE*1.4&&musicBass>0.5&&musicBeatDecay<=0;
-if(musicBeat)musicBeatDecay=8;
+musicBeat=musicEnergy>avgE*1.2&&musicBass>0.3&&musicBeatDecay<=0;
+if(musicBeat)musicBeatDecay=4;
 if(musicBeatDecay>0)musicBeatDecay--;
 if(musicBuffer){
 var elapsed=actx.currentTime-musicStartTime;
@@ -345,26 +345,26 @@ this.vx+=(this.hx+wx-this.x)*0.04;this.vy+=(this.hy+wy-this.y)*0.04;
 var bdx=this.x-autoWX,bdy=this.y-autoWY,bd=Math.sqrt(bdx*bdx+bdy*bdy),br=120+int*160;
 if(bd<br&&int>0.15){var f2=(1-bd/br)*int*6,a2=Math.atan2(bdy,bdx)+(Math.random()-0.5)*1.5;this.vx+=Math.cos(a2)*f2;this.vy+=Math.sin(a2)*f2;if(Math.random()<0.25){this.corrupt=true;this.ct=12+Math.random()*35;}}}
 if(musicPlaying){
-var mWave=Math.sin(this.hy*0.005+fr*0.03*musicMid)*musicBass*8;
-var mPulse=Math.cos(this.hx*0.004+fr*0.02)*musicHigh*4;
-this.vx+=(mWave+(Math.random()-0.5)*musicEnergy*3)*0.3;
-this.vy+=(mPulse+(Math.random()-0.5)*musicEnergy*2)*0.3;
+var mWave=Math.sin(this.hy*0.005+fr*0.03*musicMid)*musicBass*20;
+var mPulse=Math.cos(this.hx*0.004+fr*0.02)*musicHigh*12;
+this.vx+=(mWave+(Math.random()-0.5)*musicEnergy*8)*0.5;
+this.vy+=(mPulse+(Math.random()-0.5)*musicEnergy*6)*0.5;
 if(musicBeat){
 var bAngle=Math.atan2(this.y-H/2,this.x-W/2)+Math.random()*0.5;
-var bForce=musicBass*15;
+var bForce=musicBass*35;
 this.vx+=Math.cos(bAngle)*bForce;
 this.vy+=Math.sin(bAngle)*bForce;
 this.corrupt=true;
-this.ct=10+Math.random()*20;
+this.ct=20+Math.random()*40;
 }
-if(musicBass>0.6&&Math.random()<0.05){this.corrupt=true;this.ct=5+Math.random()*15;}
+if(musicBass>0.4&&Math.random()<0.15){this.corrupt=true;this.ct=15+Math.random()*30;}
 }
-var sp=this.corrupt?0.025:0.08;this.vx+=(this.hx-this.x)*sp;this.vy+=(this.hy-this.y)*sp;this.vx*=0.88;this.vy*=0.88;
+var sp=this.corrupt?0.012:0.08;this.vx+=(this.hx-this.x)*sp;this.vy+=(this.hy-this.y)*sp;this.vx*=0.88;this.vy*=0.88;
 if(this.corrupt){this.vx+=(Math.random()-0.5)*int*2.5;this.vy+=(Math.random()-0.5)*int*1.8;this.ct--;if(this.ct<=0)this.corrupt=false;}
 if(int>0.1){this.vx+=(Math.random()-0.5)*int*0.8;this.vy+=(Math.random()-0.5)*int*0.6;}
 this.x+=this.vx;this.y+=this.vy;
 this.r=BR+Math.sin(fr*this.bs+this.ph)*0.3;if(this.corrupt)this.r=BR+Math.random()*int*3;if(int>0.5&&Math.random()<0.012)this.r=0.4;
-if(musicPlaying){this.r+=musicBass*1.5+musicEnergy*0.5;}
+if(musicPlaying){this.r+=musicBass*3+musicEnergy*1.5;}
 if(this.dead){this.x=this.hx+this.stuck;this.y=this.hy+this.stuck;}
 };
 Dot.prototype.draw=function(ctx,int){
@@ -372,10 +372,10 @@ var r=this.b,g=this.b,bl=this.b;
 if(this.dead){if(Math.random()<0.7){r=255;g=30;bl=60;}else{r=0;g=0;bl=0;}}
 else if(this.corrupt){var ch=(Math.random()*3)|0;if(ch===0){r=Math.min(255,this.b+100*int);g*=0.3;bl*=0.3;}else if(ch===1){g=Math.min(255,this.b+80*int);r*=0.3;bl*=0.3;}else{bl=Math.min(255,this.b+110*int);r*=0.3;g*=0.3;}}
 if(musicPlaying&&!this.dead){
-r=Math.min(255,r+musicBass*120);
-g=Math.min(255,g+musicMid*80);
-bl=Math.min(255,bl+musicHigh*100);
-if(musicBeat){r=Math.min(255,r+80);g=Math.min(255,g+20);}
+r=Math.min(255,r+musicBass*200);
+g=Math.min(255,g+musicMid*150);
+bl=Math.min(255,bl+musicHigh*180);
+if(musicBeat){r=Math.min(255,r+150);g=Math.min(255,g+60);bl=Math.min(255,bl+80);}
 }
 if(((this.y/6)|0)%2===0&&int>0.2){r*=0.75;g*=0.75;bl*=0.75;}
 if(int>0.4){var s=Math.max(2,(28*int)|0);r=((r/s)|0)*s;g=((g/s)|0)*s;bl=((bl/s)|0)*s;}
@@ -435,13 +435,13 @@ particles.push(dot);}}}
 }
 
 function drawStatic(){var img=stX.createImageData(W,H),d=img.data,lv=12+intensity*200;
-if(musicPlaying)lv+=musicEnergy*150;
+if(musicPlaying)lv+=musicEnergy*250;
 for(var i=0;i<d.length;i+=8){var v=Math.random()*lv;d[i]=v;d[i+1]=v;d[i+2]=v;d[i+3]=255;d[i+4]=v;d[i+5]=v;d[i+6]=v;d[i+7]=255;}
-stX.putImageData(img,0,0);stC.style.opacity=''+(0.02+intensity*0.12+(musicPlaying?musicEnergy*0.08:0));}
+stX.putImageData(img,0,0);stC.style.opacity=''+(0.02+intensity*0.12+(musicPlaying?musicEnergy*0.15:0));}
 
 function drawBg(){bgX.fillStyle='rgba(10,10,10,'+(0.2+(1-intensity)*0.4)+')';bgX.fillRect(0,0,W,H);
 var effectInt=intensity;
-if(musicPlaying)effectInt=Math.max(effectInt,musicEnergy*1.5);
+if(musicPlaying)effectInt=Math.max(effectInt,musicEnergy*2.0);
 if(effectInt<0.03)return;
 var n=(effectInt*18)|0,cols=['255,20,60','20,255,100','60,80,255','255,255,255'];
 if(musicPlaying){cols=['255,'+Math.floor(30+musicMid*100)+',60','20,255,'+Math.floor(100+musicHigh*155),''+Math.floor(60+musicBass*195)+',80,255','255,255,255'];}
@@ -450,9 +450,9 @@ if(effectInt>0.5){var bl=((effectInt-0.5)*10)|0;for(var i=0;i<bl;i++){bgX.fillSt
 
 function rowDisplace(){
 var effectInt=intensity;
-if(musicPlaying)effectInt=Math.max(effectInt,musicBass*0.8);
+if(musicPlaying)effectInt=Math.max(effectInt,musicBass*1.2);
 if(effectInt<0.15)return;var n=(effectInt*6)|0;
-if(musicBeat)n+=4;
+if(musicBeat)n+=10;
 for(var i=0;i<n;i++){var y=(Math.random()*H)|0,h=Math.min((1+Math.random()*12*effectInt)|0,H-y),s=((Math.random()-0.5)*effectInt*50)|0;
 if(h>0&&Math.abs(s)>0){try{var sl=dotX.getImageData(0,y,W,h);dotX.putImageData(sl,s,y);}catch(e){}}}}
 
@@ -485,10 +485,10 @@ dotX.fillRect(cx,cy-fs*0.35,Math.max(2,fs*0.05),fs*0.7);
 function animate(){frame++;
 analyzeMusicData();
 if(musicPlaying){
-var musicInt=musicEnergy*1.8+musicBass*0.5;
+var musicInt=musicEnergy*2.5+musicBass*1.0;
 targetInt=Math.max(targetInt,Math.min(1,musicInt));
-if(musicBeat&&Math.random()<0.5){
-serifW+=(Math.random()-0.5)*0.6;
+if(musicBeat&&Math.random()<0.8){
+serifW+=(Math.random()-0.5)*1.0;
 serifW=Math.max(0,Math.min(1,serifW));
 var p=Math.random()<serifW?FSERIF:FSANS;
 curFont=p[(Math.random()*p.length)|0];
@@ -497,7 +497,7 @@ sampleText();
 }
 if(autoMode)updateAutoMode();
 else if(!musicPlaying){targetInt=isDown?Math.min(1,targetInt+0.05):Math.max(0,targetInt-0.012);}
-else{targetInt=Math.max(0,targetInt-0.03);}
+else{targetInt=Math.max(0,targetInt-0.015);}
 intensity+=(targetInt-intensity)*0.1;
 if(!autoMode&&!isDown&&!musicPlaying&&Math.random()<0.003){targetInt=0.08+Math.random()*0.2;setTimeout(function(){if(!isDown&&!autoMode&&!musicPlaying)targetInt=0;},30+Math.random()*150);}
 if(!autoMode&&!musicPlaying&&(frame%150===0||(intensity>0.3&&frame%40===0))){serifW+=(Math.random()-0.5)*0.25*Math.max(0.2,intensity);serifW=Math.max(0,Math.min(1,serifW));
