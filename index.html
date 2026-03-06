@@ -423,7 +423,7 @@ Dot.prototype.draw=function(ctx,int){
 var r=this.b,g=this.b,bl=this.b;
 if(this.dead){if(Math.random()<0.7){r=255;g=255;bl=255;}else{r=0;g=0;bl=0;}}
 else if(this.corrupt){var cv=Math.min(255,this.b+100*int*D.bright*(0.5+Math.random()));r=cv;g=cv;bl=cv;}
-if(musicPlaying&&!this.dead){ var mb=(musicBass*200+musicMid*150+musicHigh*180)/3*D.bright; var mv=Math.min(255,r+mb); r=mv;g=mv;bl=mv; if(musicBeat){var fl=100*D.flash;r=Math.min(255,r+fl);g=Math.min(255,g+fl);bl=Math.min(255,bl+fl);} }
+if(musicPlaying&&!this.dead){ var mb=(musicBass*200+musicMid*150+musicHigh*180)/3*D.bright; var mv=Math.min(255,r+mb); r=mv;g=mv;bl=mv; if(musicBeat){var fl=100*D.flash;r=Math.min(255,r+fl);g=Math.min(255,g+fl);bl=Math.min(255,bl+fl);}
 }
 if(((this.y/6)|0)%2===0&&int>0.2){r*=0.75;g*=0.75;bl*=0.75;}
 if(int>0.4){var s=Math.max(2,(28*int)|0);r=((r/s)|0)*s;g=((g/s)|0)*s;bl=((bl/s)|0)*s;}
